@@ -1,7 +1,7 @@
 import tkinter as tk
-from tkinter import filedialog
-from excel_handler import read_excel, write_excel  # read_excel fonksiyonunu içe aktar
+from tkinter import filedialog, messagebox
 from comparator import compare_columns
+from excel_handler import read_excel, write_excel
 
 class ComparatorGUI:
     def __init__(self, master, file_selector, column_selector):
@@ -18,21 +18,33 @@ class ComparatorGUI:
         column2_name = self.column_selector.column2_name_var.get()
 
         if not all(file_paths):
-            print("Please select both files.")
+            messagebox.showerror("Hata", "Lütfen her iki dosyayı da seçin.")
             return
 
         if not column1_name or not column2_name:
-            print("Please select a column from both files.")
+            messagebox.showerror("Hata", "Her iki dosya için de bir sütun seçin.")
             return
 
         df1 = read_excel(file_paths[0])
         df2 = read_excel(file_paths[1])
+
+        if column1_name not in df1.columns:
+            messagebox.showerror("Hata", f"Birinci dosyada '{column1_name}' sütunu bulunamadı.")
+            return
+        
+        if column2_name not in df2.columns:
+            messagebox.showerror("Hata", f"İkinci dosyada '{column2_name}' sütunu bulunamadı.")
+            return
+
         matched_data = compare_columns(df1, df2, column1_name, column2_name)
 
-        output_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
-                                                   filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
-        if output_path:
-            write_excel(matched_data, output_path)
-            print(f"Matched data written to {output_path}")
+        if matched_data.empty:
+            messagebox.showinfo("Bilgi", "Eşleşen veri bulunamadı.")
         else:
-            print("Save cancelled, the data was not saved.")
+            output_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
+                                                       filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
+            if output_path:
+                write_excel(matched_data, output_path)
+                messagebox.showinfo("Başarılı", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
+            else:
+                messagebox.showinfo("İptal Edildi", "Kaydetme işlemi iptal edildi.")
