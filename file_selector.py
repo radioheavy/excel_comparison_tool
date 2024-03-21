@@ -15,9 +15,9 @@ class FileSelector:
         self.file2_button.pack()
 
     def select_file(self, file_number):
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls;*.xlsx")])
         if file_path and os.path.isfile(file_path):
             self.file_paths[file_number - 1] = file_path
             self.update_columns_callback()
         else:
-            messagebox.showerror("Error", "Invalid file path.")
+            messagebox.showerror("Error", "Invalid file path or format.")

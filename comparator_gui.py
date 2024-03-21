@@ -14,8 +14,8 @@ class ComparatorGUI:
 
     def compare(self):
         file_paths = self.file_selector.file_paths
-        column1_name = self.column_selector.column1_name_var.get()
-        column2_name = self.column_selector.column2_name_var.get()
+        column1_name = self.column_selector.column1_name_var.get().strip()
+        column2_name = self.column_selector.column2_name_var.get().strip()
 
         if not all(file_paths):
             messagebox.showerror("Error", "Please select both files.")
