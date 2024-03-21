@@ -18,33 +18,27 @@ class ComparatorGUI:
         column2_name = self.column_selector.column2_name_var.get()
 
         if not all(file_paths):
-            messagebox.showerror("Hata", "Lütfen her iki dosyayı da seçin.")
+            messagebox.showerror("Error", "Please select both files.")
             return
 
         if not column1_name or not column2_name:
-            messagebox.showerror("Hata", "Her iki dosya için de bir sütun seçin.")
+            messagebox.showerror("Error", "Please select a column from both files.")
             return
 
         df1 = read_excel(file_paths[0])
         df2 = read_excel(file_paths[1])
 
-        if column1_name not in df1.columns:
-            messagebox.showerror("Hata", f"Birinci dosyada '{column1_name}' sütunu bulunamadı.")
-            return
-        
-        if column2_name not in df2.columns:
-            messagebox.showerror("Hata", f"İkinci dosyada '{column2_name}' sütunu bulunamadı.")
+        if column1_name not in df1.columns or column2_name not in df2.columns:
+            messagebox.showerror("Error", "The selected column does not exist in one of the files.")
             return
 
         matched_data = compare_columns(df1, df2, column1_name, column2_name)
 
         if matched_data.empty:
-            messagebox.showinfo("Bilgi", "Eşleşen veri bulunamadı.")
-        else:
-            output_path = filedialog.asksaveasfilename(defaultextension=".xlsx",
-                                                       filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
-            if output_path:
-                write_excel(matched_data, output_path)
-                messagebox.showinfo("Başarılı", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
-            else:
-                messagebox.showinfo("İptal Edildi", "Kaydetme işlemi iptal edildi.")
+            messagebox.showinfo("Info", "No matching data found.")
+            return
+
+        output_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
+        if output_path:
+            write_excel(matched_data, output_path)
+            messagebox.showinfo("Success", f"Matching data written to {output_path}")

@@ -21,14 +21,18 @@ class ColumnSelector:
         self.column2_dropdown.pack()
 
     def update_columns(self, file_paths):
-        if file_paths[0]:
-            df = read_excel(file_paths[0])
-            self.column1_dropdown['values'] = df.columns.tolist()
-            if df.columns.tolist():
-                self.column1_dropdown.current(0)
-
-        if file_paths[1]:
-            df = read_excel(file_paths[1])
-            self.column2_dropdown['values'] = df.columns.tolist()
-            if df.columns.tolist():
-                self.column2_dropdown.current(0)
+        for i, file_path in enumerate(file_paths):
+            if file_path:
+                df = read_excel(file_path)
+                if df.empty:
+                    tk.messagebox.showerror("Error", f"The file {file_path} is empty.")
+                    continue
+                columns = df.columns.tolist()
+                if i == 0:
+                    self.column1_dropdown['values'] = columns
+                    if columns:
+                        self.column1_dropdown.current(0)
+                else:
+                    self.column2_dropdown['values'] = columns
+                    if columns:
+                        self.column2_dropdown.current(0)

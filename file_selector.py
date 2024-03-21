@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from excel_handler import read_excel
 
 class FileSelector:
     def __init__(self, master, update_columns_callback):
@@ -17,9 +16,8 @@ class FileSelector:
 
     def select_file(self, file_number):
         file_path = filedialog.askopenfilename()
-        if file_path:
-            if os.path.isfile(file_path):
-                self.file_paths[file_number - 1] = file_path
-                self.update_columns_callback()
-            else:
-                messagebox.showerror("Hata", f"Seçilen dosya bulunamadı: {file_path}")
+        if file_path and os.path.isfile(file_path):
+            self.file_paths[file_number - 1] = file_path
+            self.update_columns_callback()
+        else:
+            messagebox.showerror("Error", "Invalid file path.")
