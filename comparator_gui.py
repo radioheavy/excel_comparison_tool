@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from comparator import compare_columns
 from excel_handler import read_excel, write_excel
 
@@ -9,47 +9,55 @@ class ComparatorGUI:
         self.file_selector = file_selector
         self.column_selector = column_selector
 
+        self.progress = ttk.Progressbar(master, orient="horizontal", length=300, mode="determinate")
+        self.progress.pack()
+
         self.compare_button = tk.Button(master, text="Compare", command=self.compare)
         self.compare_button.pack()
 
     def compare(self):
-        # Kullanıcıdan işlem başlatma onayı alma
-        if not messagebox.askyesno("Onay", "Karşılaştırmayı başlatmak istediğinize emin misiniz?"):
-            messagebox.showinfo("Bilgi", "Karşılaştırma işlemi iptal edildi.")
-            return
+        self.progress["maximum"] = 100
+        self.progress["value"] = 0
+        self.update_progress(20)  # İlk adımın tamamlanması
 
         file_paths = self.file_selector.file_paths
         column1_name = self.column_selector.column1_name_var.get().strip()
         column2_name = self.column_selector.column2_name_var.get().strip()
 
         if not all(file_paths):
-            messagebox.showerror("Hata", "Lütfen her iki dosyayı da seçin.")
+            messagebox.showerror("Error", "Please select both files.")
             return
 
         if not column1_name or not column2_name:
-            messagebox.showerror("Hata", "Her iki dosya için de bir sütun seçin.")
+            messagebox.showerror("Error", "Please select a column from both files.")
             return
+
+        self.update_progress(40)  # Dosyaların yüklenmesi
 
         df1 = read_excel(file_paths[0])
         df2 = read_excel(file_paths[1])
 
         if column1_name not in df1.columns or column2_name not in df2.columns:
-            messagebox.showerror("Hata", "Seçilen sütun bir veya her iki dosyada bulunamadı.")
+            messagebox.showerror("Error", "The selected column does not exist in one of the files.")
             return
 
-        # Kullanıcıya işlemin başladığını bildir
-        messagebox.showinfo("Bilgi", "Karşılaştırma işlemi başlıyor...")
+        self.update_progress(60)  # Sütunların doğrulanması
 
         matched_data = compare_columns(df1, df2, column1_name, column2_name)
 
+        self.update_progress(80)  # Karşılaştırmanın tamamlanması
+
         if matched_data.empty:
-            messagebox.showinfo("Bilgi", "Eşleşen veri bulunamadı.")
+            messagebox.showinfo("Info", "No matching data found.")
             return
 
-        # Dosya kaydetme diyalogu
         output_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
         if output_path:
             write_excel(matched_data, output_path)
-            messagebox.showinfo("Başarılı", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
-        else:
-            messagebox.showinfo("Bilgi", "Kaydetme işlemi iptal edildi.")
+            messagebox.showinfo("Success", f"Matching data written to {output_path}")
+
+        self.update_progress(100)  # İşlemin tamamlanması
+
+    def update_progress(self, value):
+        self.progress["value"] = value
+        self.master.update_idletasks()  # İlerleme çubuğunu güncelle
