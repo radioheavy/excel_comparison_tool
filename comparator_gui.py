@@ -28,7 +28,7 @@ class ComparatorGUI:
     def animate_loading(self, step=0):
         states = ["", ".", "..", "...", "...."]
         self.loading_label.config(text="Yükleniyor" + states[step % len(states)])
-        self.master.after(500, self.animate_loading, step+1)  # 500 ms sonra bu fonksiyonu tekrar çağır
+        self.master.after(500, self.animate_loading, step+1)
 
     def compare(self):
         # Onay alınmadan önce animasyonu başlat
