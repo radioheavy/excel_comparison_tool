@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from tooltip import ToolTip  # ToolTip sınıfını tooltip.py dosyasından import edin
+from tooltip import ToolTip  # tooltip.py dosyasından ToolTip'i import et
 from comparator import compare_columns
 from excel_handler import read_excel, write_excel
 
