@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from tooltip import ToolTip  # ToolTip sınıfını import edin
+from tooltip import ToolTip  # tooltip.py dosyasından ToolTip'i import et
 from comparator import compare_columns
 from excel_handler import read_excel, write_excel
 
@@ -16,13 +16,26 @@ class ComparatorGUI:
         self.compare_button = tk.Button(master, text="Compare", command=self.compare)
         self.compare_button.pack()
 
-        # Compare butonu için tooltip ekleme
+        # Tooltip için
         self.compare_button_tooltip = ToolTip(self.compare_button)
         self.compare_button.bind("<Enter>", lambda e: self.compare_button_tooltip.show_tip("Karşılaştırmayı başlatır."))
         self.compare_button.bind("<Leave>", lambda e: self.compare_button_tooltip.hide_tip())
 
+        # Yükleniyor animasyonu için
+        self.loading_label = tk.Label(master, text="", fg="blue")
+        self.loading_label.pack()
+
+    def animate_loading(self, step=0):
+        states = ["", ".", "..", "...", "...."]
+        self.loading_label.config(text="Yükleniyor" + states[step % len(states)])
+        self.master.after(500, self.animate_loading, step+1)  # 500 ms sonra bu fonksiyonu tekrar çağır
+
     def compare(self):
+        # Onay alınmadan önce animasyonu başlat
+        self.animate_loading()
+
         if not messagebox.askyesno("Onay ✅", "Karşılaştırmayı başlatmak istediğinize emin misiniz?"):
+            self.loading_label.config(text="")
             messagebox.showinfo("İptal Edildi ❌", "Karşılaştırma işlemi iptal edildi.")
             return
 
@@ -67,3 +80,4 @@ class ComparatorGUI:
 
         self.progress["value"] = 100
         self.master.update_idletasks()
+        self.loading_label.config(text="")  # Animasyonu durdur
