@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+from tooltip import ToolTip  # ToolTip sınıfını tooltip.py dosyasından import edin
 from comparator import compare_columns
 from excel_handler import read_excel, write_excel
 
@@ -15,8 +16,12 @@ class ComparatorGUI:
         self.compare_button = tk.Button(master, text="Compare", command=self.compare)
         self.compare_button.pack()
 
+        # Compare butonu için tooltip ekleme
+        self.compare_button_tooltip = ToolTip(self.compare_button)
+        self.compare_button.bind("<Enter>", lambda e: self.compare_button_tooltip.show_tip("Karşılaştırmayı başlatır."))
+        self.compare_button.bind("<Leave>", lambda e: self.compare_button_tooltip.hide_tip())
+
     def compare(self):
-        # Kullanıcıdan karşılaştırma işlemine devam etmek için onay al
         if not messagebox.askyesno("Onay", "Karşılaştırmayı başlatmak istediğinize emin misiniz?"):
             messagebox.showinfo("İptal Edildi", "Karşılaştırma işlemi iptal edildi.")
             return
