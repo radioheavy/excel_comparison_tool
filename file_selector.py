@@ -1,6 +1,5 @@
-import os
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 
 class FileSelector:
     def __init__(self, master, update_columns_callback):
@@ -15,9 +14,9 @@ class FileSelector:
         self.file2_button.pack()
 
     def select_file(self, file_number):
-        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls;*.xlsx")])
-        if file_path and os.path.isfile(file_path):
-            self.file_paths[file_number - 1] = file_path
-            self.update_columns_callback()
+        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
+        if file_number == 1:
+            self.file_paths[0] = file_path
         else:
-            messagebox.showerror("Error", "Invalid file path or format.")
+            self.file_paths[1] = file_path
+        self.update_columns_callback(self.file_paths)

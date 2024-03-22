@@ -3,6 +3,8 @@ from tkinter import filedialog, messagebox, ttk
 from tooltip import ToolTip  # tooltip.py dosyasından ToolTip'i import et
 from comparator import compare_columns
 from excel_handler import read_excel, write_excel
+from file_selector import FileSelector
+from column_selector import ColumnSelector
 
 class ComparatorGUI:
     def __init__(self, master, file_selector, column_selector):
@@ -31,53 +33,37 @@ class ComparatorGUI:
         self.master.after(500, self.animate_loading, step+1)
 
     def compare(self):
-        # Onay alınmadan önce animasyonu başlat
         self.animate_loading()
-
-        if not messagebox.askyesno("Onay ✅", "Karşılaştırmayı başlatmak istediğinize emin misiniz?"):
-            self.loading_label.config(text="")
-            messagebox.showinfo("İptal Edildi ❌", "Karşılaştırma işlemi iptal edildi.")
-            return
-
-        self.progress["maximum"] = 100
-        self.progress["value"] = 0
-        self.master.update_idletasks()
 
         file_paths = self.file_selector.file_paths
         column1_name = self.column_selector.column1_name_var.get().strip()
         column2_name = self.column_selector.column2_name_var.get().strip()
 
-        if not all(file_paths):
-            messagebox.showerror("Hata ❌", "Lütfen her iki dosyayı da seçin.")
+        if not all(file_paths) or not column1_name or not column2_name:
+            messagebox.showerror("Hata", "Lütfen tüm alanları doldurun.")
+            self.loading_label.config(text="")
+            self.progress["value"] = 0
             return
-
-        if not column1_name or not column2_name:
-            messagebox.showerror("Hata ❌", "Lütfen her iki dosyadan bir sütun seçin.")
-            return
-
-        self.progress["value"] = 50
-        self.master.update_idletasks()
 
         df1 = read_excel(file_paths[0])
         df2 = read_excel(file_paths[1])
 
         if column1_name not in df1.columns or column2_name not in df2.columns:
-            messagebox.showerror("Hata ❌", "Seçilen sütun dosyalardan birinde bulunamadı.")
+            messagebox.showerror("Hata", "Seçilen sütun dosyalardan birinde bulunamadı.")
+            self.loading_label.config(text="")
+            self.progress["value"] = 0
             return
-
-        self.progress["value"] = 75
-        self.master.update_idletasks()
 
         matched_data = compare_columns(df1, df2, column1_name, column2_name)
 
         if matched_data.empty:
-            messagebox.showinfo("Sonuç ⚠️", "Eşleşen veri bulunamadı.")
+            messagebox.showinfo("Sonuç", "Eşleşen veri bulunamadı.")
         else:
             output_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
             if output_path:
                 write_excel(matched_data, output_path)
-                messagebox.showinfo("Başarılı ✅", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
+                messagebox.showinfo("Başarılı", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
 
         self.progress["value"] = 100
         self.master.update_idletasks()
-        self.loading_label.config(text="")  # Animasyonu durdur
+        self.loading_label.config(text="")

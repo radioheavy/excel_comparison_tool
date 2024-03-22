@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from excel_handler import read_excel
 
 class ColumnSelector:
