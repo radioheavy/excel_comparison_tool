@@ -16,48 +16,50 @@ class ComparatorGUI:
         self.compare_button.pack()
 
     def compare(self):
+        # Kullanıcıdan karşılaştırma işlemine devam etmek için onay al
+        if not messagebox.askyesno("Onay", "Karşılaştırmayı başlatmak istediğinize emin misiniz?"):
+            messagebox.showinfo("İptal Edildi", "Karşılaştırma işlemi iptal edildi.")
+            return
+
         self.progress["maximum"] = 100
         self.progress["value"] = 0
-        self.update_progress(20)  # İlk adımın tamamlanması
+        self.master.update_idletasks()
 
         file_paths = self.file_selector.file_paths
         column1_name = self.column_selector.column1_name_var.get().strip()
         column2_name = self.column_selector.column2_name_var.get().strip()
 
         if not all(file_paths):
-            messagebox.showerror("Error", "Please select both files.")
+            messagebox.showerror("Hata", "Lütfen her iki dosyayı da seçin.")
             return
 
         if not column1_name or not column2_name:
-            messagebox.showerror("Error", "Please select a column from both files.")
+            messagebox.showerror("Hata", "Lütfen her iki dosyadan bir sütun seçin.")
             return
 
-        self.update_progress(40)  # Dosyaların yüklenmesi
+        self.progress["value"] = 50
+        self.master.update_idletasks()
 
         df1 = read_excel(file_paths[0])
         df2 = read_excel(file_paths[1])
 
         if column1_name not in df1.columns or column2_name not in df2.columns:
-            messagebox.showerror("Error", "The selected column does not exist in one of the files.")
+            messagebox.showerror("Hata", "Seçilen sütun dosyalardan birinde bulunamadı.")
             return
 
-        self.update_progress(60)  # Sütunların doğrulanması
+        self.progress["value"] = 75
+        self.master.update_idletasks()
 
         matched_data = compare_columns(df1, df2, column1_name, column2_name)
 
-        self.update_progress(80)  # Karşılaştırmanın tamamlanması
-
         if matched_data.empty:
-            messagebox.showinfo("Info", "No matching data found.")
+            messagebox.showinfo("Sonuç", "Eşleşen veri bulunamadı.")
             return
 
         output_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")])
         if output_path:
             write_excel(matched_data, output_path)
-            messagebox.showinfo("Success", f"Matching data written to {output_path}")
+            messagebox.showinfo("Başarılı", f"Eşleşen veriler {output_path} dosyasına yazıldı.")
 
-        self.update_progress(100)  # İşlemin tamamlanması
-
-    def update_progress(self, value):
-        self.progress["value"] = value
-        self.master.update_idletasks()  # İlerleme çubuğunu güncelle
+        self.progress["value"] = 100
+        self.master.update_idletasks()
